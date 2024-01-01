@@ -1,0 +1,4 @@
+Django>=4.2
+django-ninja>=1.0
+pyjwt>=2.6
+wheel>=0.4
