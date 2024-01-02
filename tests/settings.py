@@ -9,7 +9,7 @@ DATABASES = {
     }
 }
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS: list[str] = []
 
 TIME_ZONE = "UTC"
 

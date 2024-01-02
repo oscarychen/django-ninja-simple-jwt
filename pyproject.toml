@@ -1,0 +1,33 @@
+[tool.black]
+line-length = 120
+target-version = ["py312"]
+
+[tool.isort]
+profile = "black"
+line_length = 120
+extend_skip_glob = ["environment/*"]
+
+[tool.flake8]
+max-line-length = 120
+
+[tool.pylint.MASTER]
+load-plugins = "pylint_django"
+django-settings-module = "tests.settings"
+max-parents = 15
+max-attributes=12
+
+[tool.pylint.messages_control]
+
+max-line-length = 120
+
+disable = [
+    "missing-docstring",
+    "invalid-name",
+    "fixme",
+    "duplicate-code",
+    "too-many-public-methods",
+    "too-few-public-methods",
+    "abstract-method",
+    "raise-missing-from",
+    "too-many-arguments",
+]

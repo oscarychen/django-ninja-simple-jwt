@@ -1,4 +1,14 @@
+
+black==23.11.0
 Django>=4.2
 django-ninja>=1.0
+django-stubs[compatible-mypy]==4.2.6
+freezegun==1.2.2
+isort==5.12.0
+mypy==1.6.1
+pre-commit==3.4.0
 pyjwt>=2.6
+pylint==3.0.2
+pylint-django==2.5.5
+tox==4.11
 wheel>=0.4
