@@ -1,16 +1,31 @@
+from datetime import timedelta
 from typing import Any, Optional, TypedDict
 
 from django.conf import settings
 from django.test.signals import setting_changed
+from typing_extensions import NotRequired
 
 USER_SETTINGS = getattr(settings, "NINJA_SIMPLE_JWT", None)
 
 
 class NinjaSimpleJwtSettingsDict(TypedDict):
-    pass
+    JWT_KEY_STORAGE: NotRequired[str]
+    JWT_PRIVATE_KEY_PATH: NotRequired[str]
+    JWT_PUBLIC_KEY_PATH: NotRequired[str]
+    JWT_REFRESH_COOKIE_NAME: NotRequired[str]
+    JWT_REFRESH_TOKEN_LIFETIME: NotRequired[timedelta]
+    JWT_ACCESS_TOKEN_LIFETIME: NotRequired[timedelta]
 
 
-DEFAULTS: NinjaSimpleJwtSettingsDict = {}
+DEFAULTS: NinjaSimpleJwtSettingsDict = {
+    "JWT_KEY_STORAGE": "ninja_simple_jwt.jwt.key_store.local_disk_key_storage",
+    "JWT_PRIVATE_KEY_PATH": "jwt-signing.pem",
+    "JWT_PUBLIC_KEY_PATH": "jwt-signing.pub",
+    "JWT_REFRESH_COOKIE_NAME": "refresh",
+    "JWT_REFRESH_TOKEN_LIFETIME": timedelta(days=30),
+    "JWT_ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+}
+
 EMPTY_SETTINGS: NinjaSimpleJwtSettingsDict = {}
 
 
@@ -35,7 +50,6 @@ class NinjaSimpleJwtSettings:
         if attr not in self.defaults:
             raise AttributeError(f"Invalid NINJA_SIMPLE_JWT setting: {attr}")
 
-        # get from user settings or default value
         try:
             val = self.user_settings[attr]  # type: ignore
         except KeyError:
