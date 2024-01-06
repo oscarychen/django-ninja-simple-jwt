@@ -15,6 +15,10 @@ class NinjaSimpleJwtSettingsDict(TypedDict):
     JWT_REFRESH_COOKIE_NAME: NotRequired[str]
     JWT_REFRESH_TOKEN_LIFETIME: NotRequired[timedelta]
     JWT_ACCESS_TOKEN_LIFETIME: NotRequired[timedelta]
+    WEB_REFRESH_COOKIE_SECURE: NotRequired[bool]
+    WEB_REFRESH_COOKIE_HTTP_ONLY: NotRequired[bool]
+    WEB_REFRESH_COOKIE_SAME_SITE_POLICY: NotRequired[str]
+    WEB_REFRESH_COOKIE_PATH: NotRequired[str]
 
 
 DEFAULTS: NinjaSimpleJwtSettingsDict = {
@@ -24,6 +28,10 @@ DEFAULTS: NinjaSimpleJwtSettingsDict = {
     "JWT_REFRESH_COOKIE_NAME": "refresh",
     "JWT_REFRESH_TOKEN_LIFETIME": timedelta(days=30),
     "JWT_ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+    "WEB_REFRESH_COOKIE_SECURE": not settings.DEBUG,
+    "WEB_REFRESH_COOKIE_HTTP_ONLY": True,
+    "WEB_REFRESH_COOKIE_SAME_SITE_POLICY": "Strict",
+    "WEB_REFRESH_COOKIE_PATH": "/api/auth/web/token-refresh",
 }
 
 EMPTY_SETTINGS: NinjaSimpleJwtSettingsDict = {}

@@ -23,11 +23,12 @@ Expose `Django-ninja`'s API and add `ninja_simple_jwt`;s auth API endpoint route
 # urls.py
 
 from ninja import NinjaAPI
-from ninja_simple_jwt.auth.views.api import auth_router
+from ninja_simple_jwt.auth.views.api import mobile_auth_router, web_auth_router
 from django.urls import path
 
 api = NinjaAPI()
-api.add_router("/auth/", auth_router)
+api.add_router("/auth/mobile/", mobile_auth_router)
+api.add_router("/auth/web/", web_auth_router)
 
 urlpatterns = [path("api/", api.urls)]
 ```
