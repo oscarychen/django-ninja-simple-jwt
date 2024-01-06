@@ -1,6 +1,5 @@
 from datetime import UTC, datetime
 
-from django.conf import settings
 from django.contrib.auth import authenticate
 from django.http import HttpRequest, HttpResponse
 from jwt.exceptions import PyJWTError
@@ -21,10 +20,11 @@ from ninja_simple_jwt.jwt.token_operations import (
 )
 from ninja_simple_jwt.settings import ninja_simple_jwt_settings
 
-auth_router = Router()
+mobile_auth_router = Router()
+web_auth_router = Router()
 
 
-@auth_router.post("/mobile/sign-in", response=MobileSignInResponse)
+@mobile_auth_router.post("/sign-in", response=MobileSignInResponse)
 def mobile_sign_in(request: HttpRequest, payload: SignInRequest) -> dict:
     payload_data = payload.dict()
     user = authenticate(username=payload_data["username"], password=payload_data["password"])
@@ -35,7 +35,7 @@ def mobile_sign_in(request: HttpRequest, payload: SignInRequest) -> dict:
     return {"refresh": refresh_token, "access": access_token}
 
 
-@auth_router.post("/mobile/token-refresh", response=MobileTokenRefreshResponse)
+@mobile_auth_router.post("/token-refresh", response=MobileTokenRefreshResponse)
 def mobile_token_refresh(request: HttpRequest, payload: MobileTokenRefreshRequest) -> dict:
     payload_data = payload.dict()
     try:
@@ -46,7 +46,7 @@ def mobile_token_refresh(request: HttpRequest, payload: MobileTokenRefreshReques
     return {"access": access_token}
 
 
-@auth_router.post("/web/sign-in", response=WebSignInResponse)
+@web_auth_router.post("/sign-in", response=WebSignInResponse)
 def web_sign_in(request: HttpRequest, payload: SignInRequest, response: HttpResponse) -> dict:
     payload_data = payload.dict()
     user = authenticate(username=payload_data["username"], password=payload_data["password"])
@@ -58,15 +58,15 @@ def web_sign_in(request: HttpRequest, payload: SignInRequest, response: HttpResp
         key=ninja_simple_jwt_settings.JWT_REFRESH_COOKIE_NAME,
         value=refresh_token,
         expires=datetime.fromtimestamp(refresh_token_payload["exp"], UTC),
-        httponly=True,
-        samesite="Strict",
-        secure=not settings.DEBUG,
-        path="/api/auth/web/token-refresh",
+        httponly=ninja_simple_jwt_settings.WEB_REFRESH_COOKIE_HTTP_ONLY,
+        samesite=ninja_simple_jwt_settings.WEB_REFRESH_COOKIE_SAME_SITE_POLICY,
+        secure=ninja_simple_jwt_settings.WEB_REFRESH_COOKIE_SECURE,
+        path=ninja_simple_jwt_settings.WEB_REFRESH_COOKIE_PATH,
     )
     return {"access": access_token}
 
 
-@auth_router.post("/web/token-refresh", response=WebSignInResponse)
+@web_auth_router.post("/token-refresh", response=WebSignInResponse)
 def web_token_refresh(request: HttpRequest) -> dict:
     cookie = request.COOKIES.get(ninja_simple_jwt_settings.JWT_REFRESH_COOKIE_NAME)
     if cookie is None:
