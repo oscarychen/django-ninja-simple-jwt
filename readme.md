@@ -37,7 +37,7 @@ This would provide 4 available auth API endpoints for mobile and web sign in and
 - {{server_url}}/api/auth/web/sign-in
 - {{server_url}}/api/auth/web/token-refresh
 
-Finally, to provide a resource API, you can use the `HttpJwtAuth` as the auth argument when instantiating a Router, ie:
+To provide a resource API, you can use the `HttpJwtAuth` as the auth argument when instantiating a Router, ie:
 ```python
 # views.py
 
@@ -50,3 +50,11 @@ some_resource_router = Router(auth=HttpJwtAuth())
 def hello(request):
     return "Hello world"
 ```
+
+Finally, before starting up the server, create a key pair to be used by the server for signing and verifying JWT:
+```commandline
+python manage.py make_rsa
+```
+You should see two files created in the root of project repository:
+- jwt-signing.pem  # this is the private key used to sign a JWT, keep this secret, store appropriately
+- jwt-signing.pub  # this is the public key used to verify a JWT
