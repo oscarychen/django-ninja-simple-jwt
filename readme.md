@@ -18,7 +18,7 @@ INSTALLED_APPS = [
 ]
 ```
 
-Expose `Django-ninja`'s API and add `ninja_simple_jwt`;s auth API endpoint router to the API, ie:
+Expose `Django-ninja`'s API and add `ninja_simple_jwt`'s auth API endpoint router to the API, ie:
 ```python
 # urls.py
 
@@ -38,7 +38,13 @@ This would provide 4 available auth API endpoints for mobile and web sign in and
 - {{server_url}}/api/auth/web/sign-in
 - {{server_url}}/api/auth/web/token-refresh
 
-To provide a resource API, you can use the `HttpJwtAuth` as the auth argument when instantiating a Router, ie:
+_If you are not exposing the API and routers at the exact path as the example above,
+see [`WEB_REFRESH_COOKIE_PATH`](#WEB_REFRESH_COOKIE_PATH) setting regarding web auth token refresh path._
+
+_See more regarding the web auth endpoint design in [documentation below](#why-are-the-web-endpoints-designed-to-handle-access-and-refresh-tokens-like-this)._
+
+
+To protect a resource API, you can use the `HttpJwtAuth` as the auth argument when instantiating a Router, ie:
 ```python
 # views.py
 
@@ -63,7 +69,7 @@ You should see two files created in the root of project repository:
 
 ## Documentation
 
-### JWT signing key storage
+### Customizing JWT key storage
 By default, the management command `make_rsa` will create and store the JWT key pairs in the root of your project
 directory, this is only intended for development.
 
@@ -72,18 +78,23 @@ you are using `django-storages` to access AWS S3.
 
 ```python
 # some_project_dir/my_jwt_key_storage.py
+
 from storages.backends.s3boto3 import S3Boto3Storage
+
 aws_s3_key_storage = S3Boto3Storage(bucket_name="MySecretJwtKeysStorage")
 ```
 and provide the above storage instance in Django settings:
 ```python
 # settings.py
 
-JWT_KEY_STORAGE = "some_project_dir.my_jwt_key_storage.aws_s3_key_storage"
+NINJA_SIMPLE_JWT = {
+    "JWT_KEY_STORAGE": "some_project_dir.my_jwt_key_storage.aws_s3_key_storage",
+    ...
+}
 ```
 You can provide any custom storage implementation in this setting provided that they follow Django's Storage API.
 
-### Auth endpoints
+### Enabling auth API endpoints
 
 #### Mobile
 You can enable the mobile auth end points by adding a provided router to the ninja API class:
@@ -204,17 +215,26 @@ used for refreshing the tokens, therefore reducing attack surfaces further.
 
 ## Settings
 
+All settings specific for this library is stored as key-value pairs under Django setting `NINJA_SIMPLE_JWT`, ie:
+
+```python
+# settings.py
+NINJA_SIMPLE_JWT = {
+    ...
+}
+```
+
 ### JWT_KEY_STORAGE
-Storage class instance used to store JWT key pairs. Defaults to "ninja_simple_jwt.jwt.key_store.local_disk_key_storage".
+Storage class instance used to store JWT key pairs. Defaults to `"ninja_simple_jwt.jwt.key_store.local_disk_key_storage"`.
 
 ### JWT_PRIVATE_KEY_PATH
-Path to the private key, defaults to "jwt-signing.pem".
+Path to the private key, defaults to `"jwt-signing.pem"`.
 
 ### JWT_PUBLIC_KEY_PATH
-Path to the public key, defaults to "jwt-signing.pub".
+Path to the public key, defaults to `"jwt-signing.pub"`.
 
 ### JWT_REFRESH_COOKIE_NAME
-Name of the refresh cookie (used only by web auth endpoints), defaults to "refresh".
+Name of the refresh cookie (used only by web auth endpoints), defaults to `"refresh"`.
 
 
 ### JWT_REFRESH_TOKEN_LIFETIME
@@ -230,8 +250,8 @@ Whether to use secure cookie for refresh token, defaults to `not settings.DEBUG`
 Whether to use httponly cookie for refresh token, defaults to `True`.
 
 ### WEB_REFRESH_COOKIE_SAME_SITE_POLICY
-Same-site policy to be used for refresh token cookie, defaults to "Strict".
+Same-site policy to be used for refresh token cookie, defaults to `"Strict"`.
 
 ### WEB_REFRESH_COOKIE_PATH
 This is the path set on the cookie for refresh token, this path needs to match the url endpoint you are exposing for
-web token refresh. Defaults to "/api/auth/web/token-refresh".
+web token refresh. Defaults to `"/api/auth/web/token-refresh"`.
