@@ -6,7 +6,7 @@ from ninja_simple_jwt.jwt.key_creation import make_and_save_key_pair
 from ninja_simple_jwt.jwt.token_operations import TokenTypes, decode_token, encode_token
 
 
-class TestEncodeToken(TestCase):
+class TestEncodeDecodeToken(TestCase):
     def setUp(self) -> None:
         make_and_save_key_pair()
 

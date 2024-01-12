@@ -19,6 +19,8 @@ class NinjaSimpleJwtSettingsDict(TypedDict):
     WEB_REFRESH_COOKIE_HTTP_ONLY: NotRequired[bool]
     WEB_REFRESH_COOKIE_SAME_SITE_POLICY: NotRequired[str]
     WEB_REFRESH_COOKIE_PATH: NotRequired[str]
+    TOKEN_CLAIM_USER_ATTRIBUTE_MAP: NotRequired[dict[str, str]]
+    TOKEN_USER_ENCODER_CLS: NotRequired[str]
 
 
 DEFAULTS: NinjaSimpleJwtSettingsDict = {
@@ -32,6 +34,12 @@ DEFAULTS: NinjaSimpleJwtSettingsDict = {
     "WEB_REFRESH_COOKIE_HTTP_ONLY": True,
     "WEB_REFRESH_COOKIE_SAME_SITE_POLICY": "Strict",
     "WEB_REFRESH_COOKIE_PATH": "/api/auth/web/token-refresh",
+    "TOKEN_CLAIM_USER_ATTRIBUTE_MAP": {
+        "user_id": "id",
+        "username": "username",
+        "last_login": "last_login",
+    },
+    "TOKEN_USER_ENCODER_CLS": "ninja_simple_jwt.jwt.json_encode.TokenUserEncoder",
 }
 
 EMPTY_SETTINGS: NinjaSimpleJwtSettingsDict = {}

@@ -74,6 +74,7 @@ INSTALLED_APPS = (
     "django.contrib.staticfiles",
     "django.contrib.admin",
     "django.contrib.messages",
+    "ninja_simple_jwt",
     "tests",
 )
 
@@ -109,4 +110,9 @@ LOGGING = {
             "propagate": True,
         },
     },
+}
+
+NINJA_SIMPLE_JWT = {
+    "JWT_PRIVATE_KEY_PATH": "tests/mock-jwt-signing.pem",
+    "JWT_PUBLIC_KEY_PATH": "tests/mock-jwt-signing.pub",
 }

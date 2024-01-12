@@ -1,14 +1,15 @@
 import time
 from datetime import datetime
 from enum import Enum
-from typing import Any, Tuple, TypedDict
+from json import JSONEncoder
+from typing import Any, Optional, Tuple
 from uuid import uuid4
 
 import jwt
 from django.contrib.auth.models import AbstractBaseUser
 from django.utils import timezone
+from django.utils.module_loading import import_string
 from jwt import ExpiredSignatureError, InvalidKeyError, InvalidTokenError
-from pydantic import UUID4
 
 from ninja_simple_jwt.jwt.key_retrieval import InMemoryJwtKeyPair
 from ninja_simple_jwt.settings import ninja_simple_jwt_settings
@@ -19,32 +20,35 @@ class TokenTypes(str, Enum):
     REFRESH = "refresh"
 
 
-class TokenPayload(TypedDict):
-    user_id: str
-    username: str
-
-
-class DecodedTokenPayload(TokenPayload):
-    token_type: TokenTypes
-    jti: UUID4
-    exp: int
-    iat: int
+TokenUserJsonEncoder = import_string(ninja_simple_jwt_settings.TOKEN_USER_ENCODER_CLS)
 
 
 def get_refresh_token_for_user(user: AbstractBaseUser) -> Tuple[str, dict]:
-    return encode_token({"username": user.get_username(), "user_id": user.pk}, TokenTypes.REFRESH)
+    payload = get_token_payload_for_user(user)
+    return encode_token(payload, TokenTypes.REFRESH, json_encoder=TokenUserJsonEncoder)
 
 
-def get_access_token(user_id: str, user_name: str) -> Tuple[str, dict]:
-    return encode_token({"username": user_name, "user_id": user_id}, TokenTypes.ACCESS)
+def get_access_token_for_user(user: AbstractBaseUser) -> Tuple[str, dict]:
+    payload = get_token_payload_for_user(user)
+    return encode_token(payload, TokenTypes.ACCESS, json_encoder=TokenUserJsonEncoder)
+
+
+def get_token_payload_for_user(user: AbstractBaseUser) -> dict:
+    return {
+        claim: getattr(user, user_attr)
+        for claim, user_attr in ninja_simple_jwt_settings.TOKEN_CLAIM_USER_ATTRIBUTE_MAP.items()
+    }
 
 
 def get_access_token_from_refresh_token(refresh_token: str) -> Tuple[str, dict]:
     decoded = decode_token(refresh_token, token_type=TokenTypes.REFRESH, verify=True)
-    return get_access_token(user_id=decoded["user_id"], user_name=decoded["username"])
+    payload = {claim: decoded.get(claim) for claim in ninja_simple_jwt_settings.TOKEN_CLAIM_USER_ATTRIBUTE_MAP}
+    return encode_token(payload, TokenTypes.ACCESS)
 
 
-def encode_token(payload: TokenPayload, token_type: TokenTypes, **additional_headers: Any) -> Tuple[str, dict]:
+def encode_token(
+    payload: dict, token_type: TokenTypes, json_encoder: Optional[type[JSONEncoder]] = None, **additional_headers: Any
+) -> Tuple[str, dict]:
     now = timezone.now()
     if token_type == TokenTypes.REFRESH:
         expiry = now + ninja_simple_jwt_settings.JWT_REFRESH_TOKEN_LIFETIME
@@ -53,7 +57,6 @@ def encode_token(payload: TokenPayload, token_type: TokenTypes, **additional_hea
 
     payload_data = {
         **payload,
-        "user_id": str(payload["user_id"]),
         "jti": uuid4().hex,
         "exp": int(expiry.timestamp()),
         "iat": int(now.timestamp()),
@@ -61,12 +64,18 @@ def encode_token(payload: TokenPayload, token_type: TokenTypes, **additional_hea
     }
 
     return (
-        jwt.encode(payload_data, InMemoryJwtKeyPair.private_key, algorithm="RS256", headers=additional_headers),
+        jwt.encode(
+            payload_data,
+            InMemoryJwtKeyPair.private_key,
+            algorithm="RS256",
+            headers=additional_headers,
+            json_encoder=json_encoder,
+        ),
         payload_data,
     )
 
 
-def decode_token(token: str, token_type: TokenTypes, verify: bool = True) -> DecodedTokenPayload:
+def decode_token(token: str, token_type: TokenTypes, verify: bool = True) -> dict:
     if verify is True:
         decoded = jwt.decode(token, InMemoryJwtKeyPair.public_key, algorithms=["RS256"])
         _verify_exp(decoded)
