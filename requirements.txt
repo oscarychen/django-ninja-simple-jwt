@@ -3,10 +3,10 @@ black==23.11.0
 cryptography==41.0.7
 Django>=4.2
 django-ninja>=1.0
-django-stubs[compatible-mypy]==4.2.6
+django-stubs[compatible-mypy]==4.2.7
 freezegun==1.2.2
 isort==5.12.0
-mypy==1.6.1
+mypy>=1.7
 pre-commit==3.4.0
 pyjwt>=2.6
 pylint==3.0.2
