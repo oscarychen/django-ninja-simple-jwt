@@ -1,6 +1,7 @@
 from datetime import UTC, datetime
 
 from django.contrib.auth import authenticate
+from django.contrib.auth.signals import user_logged_in
 from django.http import HttpRequest, HttpResponse
 from jwt.exceptions import PyJWTError
 from ninja import Router
@@ -14,7 +15,7 @@ from ninja_simple_jwt.auth.views.schemas import (
     WebSignInResponse,
 )
 from ninja_simple_jwt.jwt.token_operations import (
-    get_access_token,
+    get_access_token_for_user,
     get_access_token_from_refresh_token,
     get_refresh_token_for_user,
 )
@@ -28,10 +29,11 @@ web_auth_router = Router()
 def mobile_sign_in(request: HttpRequest, payload: SignInRequest) -> dict:
     payload_data = payload.dict()
     user = authenticate(username=payload_data["username"], password=payload_data["password"])
+    user_logged_in.send(sender=user.__class__, request=request, user=user)
     if user is None:
         raise AuthenticationError()
     refresh_token, _ = get_refresh_token_for_user(user)
-    access_token, _ = get_access_token(str(user.pk), user.get_username())
+    access_token, _ = get_access_token_for_user(user)
     return {"refresh": refresh_token, "access": access_token}
 
 
@@ -50,10 +52,11 @@ def mobile_token_refresh(request: HttpRequest, payload: MobileTokenRefreshReques
 def web_sign_in(request: HttpRequest, payload: SignInRequest, response: HttpResponse) -> dict:
     payload_data = payload.dict()
     user = authenticate(username=payload_data["username"], password=payload_data["password"])
+    user_logged_in.send(sender=user.__class__, request=request, user=user)
     if user is None:
         raise AuthenticationError()
     refresh_token, refresh_token_payload = get_refresh_token_for_user(user)
-    access_token, _ = get_access_token(str(user.pk), user.get_username())
+    access_token, _ = get_access_token_for_user(user)
     response.set_cookie(
         key=ninja_simple_jwt_settings.JWT_REFRESH_COOKIE_NAME,
         value=refresh_token,
