@@ -213,6 +213,43 @@ on user's behalf, and no damage can be done. The refresh token cookie would also
 attributes specified, so that browsers should only attach them with request to your domain and specific url path
 used for refreshing the tokens, therefore reducing attack surfaces further.
 
+### Customizing token claims for user
+You can specify a claim on the JWT and what User model attribute to get the claim value from using the
+setting `TOKEN_CLAIM_USER_ATTRIBUTE_MAP`.
+By default, this setting has the following value:
+```python
+{
+    # claim: model attribute
+    "user_id": "id",
+    "username": "username",
+    "last_login": "last_login",
+}
+```
+#### Serializing user attribute into JWT claim
+If the model attribute is not by default serializeable, you can specify how to serialize it by providing a custom
+implementation of json encoder class. Ie:
+```python
+# some_directory/custom_encoders.py
+
+from ninja_simple_jwt.jwt.json_encode import TokenUserEncoder
+
+class CustomTokenUserEncoder(TokenUserEncoder):
+    def default(self, o: Any) -> Any:
+        if isinstance(o, SomeCustomClass):
+            return str(o)  # custom serialization implementation here
+
+        return super().default(o)
+```
+And then provide the import string for this class in Django setting:
+```python
+# settings.py
+
+NINJA_SIMPLE_JWT = {
+    ...,
+    "TOKEN_USER_ENCODER_CLS": "some_directory.custom_encoders.CustomTokenUserEncoder"
+}
+```
+
 ## Settings
 
 All settings specific for this library is stored as key-value pairs under Django setting `NINJA_SIMPLE_JWT`, ie:
@@ -255,3 +292,18 @@ Same-site policy to be used for refresh token cookie, defaults to `"Strict"`.
 ### WEB_REFRESH_COOKIE_PATH
 This is the path set on the cookie for refresh token, this path needs to match the url endpoint you are exposing for
 web token refresh. Defaults to `"/api/auth/web/token-refresh"`.
+
+### TOKEN_CLAIM_USER_ATTRIBUTE_MAP
+A dictionary mapping token claims to corresponding User model attributes. Defaults to the following:
+```python
+{
+    "user_id": "id",
+    "username": "username",
+    "last_login": "last_login",
+}
+```
+See [Customizing token claims for user](#customizing-token-claims-for-user).
+
+### TOKEN_USER_ENCODER_CLS
+JSON encoder class used to serializing User attributes to JWT claims.
+See [Serializing user attribute into JWT claim](#serializing-user-attribute-into-jwt-claim)
