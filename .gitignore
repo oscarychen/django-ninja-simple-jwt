@@ -149,5 +149,5 @@ NOTE*.csv
 .idea
 .pylintrc
 
-mock-jwt-signing.pem
-mock-jwt-signing.pub
+jwt-signing.pem
+jwt-signing.pub
