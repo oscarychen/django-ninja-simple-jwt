@@ -55,8 +55,8 @@ def encode_token(payload: TokenPayload, token_type: TokenTypes, **additional_hea
         **payload,
         "user_id": str(payload["user_id"]),
         "jti": uuid4().hex,
-        "exp": int(time.mktime(expiry.timetuple())),
-        "iat": int(time.mktime(now.timetuple())),
+        "exp": int(expiry.timestamp()),
+        "iat": int(now.timestamp()),
         "token_type": token_type,
     }
 
