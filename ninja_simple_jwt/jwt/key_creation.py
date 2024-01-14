@@ -3,6 +3,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from django.core.files.base import ContentFile
 from django.utils.module_loading import import_string
 
+from ninja_simple_jwt.jwt.key_retrieval import InMemoryJwtKeyPair
 from ninja_simple_jwt.settings import ninja_simple_jwt_settings
 
 
@@ -15,6 +16,7 @@ def make_and_save_key_pair() -> tuple[str, str]:
     public_key_path = jwt_key_storage.save(
         name=ninja_simple_jwt_settings.JWT_PUBLIC_KEY_PATH, content=ContentFile(pem_public_key)
     )
+    InMemoryJwtKeyPair.clear()
     return private_key_path, public_key_path
 
 

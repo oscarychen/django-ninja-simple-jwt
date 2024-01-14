@@ -31,3 +31,8 @@ class InMemoryJwtKeyPair:
         jwt_key_storage = import_string(ninja_simple_jwt_settings.JWT_KEY_STORAGE)
         with jwt_key_storage.open(ninja_simple_jwt_settings.JWT_PUBLIC_KEY_PATH) as f:
             return f.read()
+
+    @classmethod
+    def clear(cls) -> None:
+        cls._public_key = None
+        cls._private_key = None
