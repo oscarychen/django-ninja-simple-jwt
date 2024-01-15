@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 from django.contrib.auth import authenticate
 from django.contrib.auth.signals import user_logged_in
@@ -64,7 +64,7 @@ def web_sign_in(request: HttpRequest, payload: SignInRequest, response: HttpResp
     response.set_cookie(
         key=ninja_simple_jwt_settings.JWT_REFRESH_COOKIE_NAME,
         value=refresh_token,
-        expires=datetime.fromtimestamp(refresh_token_payload["exp"], UTC),
+        expires=datetime.fromtimestamp(refresh_token_payload["exp"], timezone.utc),
         httponly=ninja_simple_jwt_settings.WEB_REFRESH_COOKIE_HTTP_ONLY,
         samesite=ninja_simple_jwt_settings.WEB_REFRESH_COOKIE_SAME_SITE_POLICY,
         secure=ninja_simple_jwt_settings.WEB_REFRESH_COOKIE_SECURE,
