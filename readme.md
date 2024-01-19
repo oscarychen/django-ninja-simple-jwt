@@ -39,10 +39,7 @@ This would provide 4 available auth API endpoints for mobile and web sign in and
 - {{server_url}}/api/auth/web/token-refresh
 
 _If you are not exposing the API and routers at the exact path as the example above,
-see [`WEB_REFRESH_COOKIE_PATH`](#WEB_REFRESH_COOKIE_PATH) setting regarding web auth token refresh path._
-
-_See more regarding the web auth endpoint design in [documentation below](#why-are-the-web-endpoints-designed-to-handle-access-and-refresh-tokens-like-this)._
-
+see [`WEB_REFRESH_COOKIE_PATH`](docs/settings.md#webrefreshcookiepath) setting regarding web auth token refresh path._
 
 To protect a resource API, you can use the `HttpJwtAuth` as the auth argument when instantiating a Router, ie:
 ```python
@@ -81,18 +78,24 @@ you are using `django-storages` to access AWS S3.
 
 from storages.backends.s3boto3 import S3Boto3Storage
 
-aws_s3_key_storage = S3Boto3Storage(bucket_name="MySecretJwtKeysStorage")
+aws_s3_private_key_storage = S3Boto3Storage(bucket_name="MySecretJwtKeysStorage")
+aws_s3_public_key_storage = S3Boto3Storage(bucket_name="MyPublicJwtKeysStorage")
 ```
-and provide the above storage instance in Django settings:
+and provide the above storage instances in Django settings:
 ```python
 # settings.py
 
 NINJA_SIMPLE_JWT = {
-    "JWT_KEY_STORAGE": "some_project_dir.my_jwt_key_storage.aws_s3_key_storage",
+    "JWT_PRIVATE_KEY_STORAGE": "some_project_dir.my_jwt_key_storage.aws_s3_private_key_storage",
+    "JWT_PUBLIC_KEY_STORAGE": "some_project_dir.my_jwt_key_storage.aws_s3_public_key_storage",
     ...
 }
 ```
 You can provide any custom storage implementation in this setting provided that they follow Django's Storage API.
+
+_You should make sure that the private key storage is only accessible by the auth service application.
+The public key storage may be made accessible by other services that need to verify the JWT issued by the auth service._
+
 
 ### Enabling auth API endpoints
 
@@ -126,7 +129,7 @@ The response would contain refresh and access JWT in the body:
 ```json
 {
     "refresh": "...",
-    "acess": "..."
+    "access": "..."
 }
 ```
 
@@ -147,6 +150,8 @@ The response would contain an access JWT in the body:
 ```
 
 #### Web
+_See also: [web auth endpoint design](docs/auth_api_design.md#why-are-the-web-endpoints-designed-to-handle-access-and-refresh-tokens-like-this)._
+
 Similarly to the Mobile auth end point example above,
 you can enable the web auth endpoints by adding it to the ninja API class:
 ```python
@@ -183,36 +188,6 @@ curl --location --request POST 'http://127.0.0.1:8000/api/auth/web/token-refresh
 ```
 The response would contain an access token in the body.
 
-##### Why are the web endpoints designed to handle access and refresh tokens like this?
-
-The short answer is security in depth.
-
-- Web storage (local storage and session storage) is accessible through Javascript on the same domain, this presents an
-opportunity for malicious scripts running on your site to carry out XSS against your user clients, which makes web
-storage not ideal for storing either access or refresh tokens. There are a large number of scenarios where XSS can take
-place, and a number of ways to mitigate them. you can read more about XSS [here](https://gist.github.com/oscarychen/352d60c1a2e3727d444c94b5959bb6f6).
-- Cookies with `HttpOnly` flag are not accessible by Javascript and therefore not vulnerable to XSS, however they may be
-the target of CSRF attack because of ambient authority, where cookies may be attached to requests automatically. Even
-though a malicious website carrying out a CSRF has no way of reading the response of the request which is made on behalf
-of a user, they may be able to make changes to user data resources if such endpoints exist. This makes `HttpOnly`
-cookies unsuited for storing access token. There are several ways to mitigate CSRF, such as setting the `SameSite`
-attribute of a cookie to "Lax" or "Strict", and using anti-CSRF token. You can read more about CSRF [here](https://gist.github.com/oscarychen/ce189b2fef1f8ff7eac51a72fed34960).
-
-In addition to various XSS and CSRF mitigation techniques, this package deploys access token and refresh token for web
-apps in a specific way that broadly hardens application security against these attacks:
-- Access tokens, are as usual, send back to clients in response body. It is expected that you would design your frontend
-application to not persist access tokens anywhere. They are short-lived and only used by the SPA in memory, and are
-tossed as soon as the user close the browser tab. This way, the access token cannot be utilized in a CSRF attack against
-your application.
-- Refresh tokens, are sent back to client in a `HttpOnly` cookie header that the client browser sees but inaccessible
-by your own frontend application. This way, the refresh token is not subject to any XSS attack against your application.
-While CSRF is possible, the attacker cannot use this mechanism to make modification to your resources even is a CSRF
-attack is successfully carried out. It is important to note that in CSRF, the attacker cannot read the response even
-when they successfully make the malicious request to your API endpoint; the worst they can do is to refresh the token
-on user's behalf, and no damage can be done. The refresh token cookie would also typically have `domain` and `path`
-attributes specified, so that browsers should only attach them with request to your domain and specific url path
-used for refreshing the tokens, therefore reducing attack surfaces further.
-
 ### Customizing token claims for user
 You can specify a claim on the JWT and what User model attribute to get the claim value from using the
 setting `TOKEN_CLAIM_USER_ATTRIBUTE_MAP`.
@@ -236,9 +211,13 @@ from ninja_simple_jwt.jwt.json_encode import TokenUserEncoder
 class CustomTokenUserEncoder(TokenUserEncoder):
     def default(self, o: Any) -> Any:
         if isinstance(o, SomeCustomClass):
-            return str(o)  # custom serialization implementation here
+            return self.serialize_some_custom_class(o)
 
         return super().default(o)
+
+    def serialize_some_custom_class(self, o: SomeCustomClass) -> str:
+        # custom serialization implementation here
+        return "serialized value"
 ```
 And then provide the import string for this class in Django setting:
 ```python
@@ -252,7 +231,7 @@ NINJA_SIMPLE_JWT = {
 
 ## Settings
 
-All settings specific for this library is stored as key-value pairs under Django setting `NINJA_SIMPLE_JWT`, ie:
+All settings specific for this library are stored as key-value pairs under Django setting `NINJA_SIMPLE_JWT`, ie:
 
 ```python
 # settings.py
@@ -261,49 +240,4 @@ NINJA_SIMPLE_JWT = {
 }
 ```
 
-### JWT_KEY_STORAGE
-Storage class instance used to store JWT key pairs. Defaults to `"ninja_simple_jwt.jwt.key_store.local_disk_key_storage"`.
-
-### JWT_PRIVATE_KEY_PATH
-Path to the private key, defaults to `"jwt-signing.pem"`.
-
-### JWT_PUBLIC_KEY_PATH
-Path to the public key, defaults to `"jwt-signing.pub"`.
-
-### JWT_REFRESH_COOKIE_NAME
-Name of the refresh cookie (used only by web auth endpoints), defaults to `"refresh"`.
-
-
-### JWT_REFRESH_TOKEN_LIFETIME
-Defaults to `timedelta(days=30)`.
-
-### JWT_ACCESS_TOKEN_LIFETIME
-Defaults to `timedelta(minutes=15)`
-
-### WEB_REFRESH_COOKIE_SECURE
-Whether to use secure cookie for refresh token, defaults to `not settings.DEBUG`.
-
-### WEB_REFRESH_COOKIE_HTTP_ONLY
-Whether to use httponly cookie for refresh token, defaults to `True`.
-
-### WEB_REFRESH_COOKIE_SAME_SITE_POLICY
-Same-site policy to be used for refresh token cookie, defaults to `"Strict"`.
-
-### WEB_REFRESH_COOKIE_PATH
-This is the path set on the cookie for refresh token, this path needs to match the url endpoint you are exposing for
-web token refresh. Defaults to `"/api/auth/web/token-refresh"`.
-
-### TOKEN_CLAIM_USER_ATTRIBUTE_MAP
-A dictionary mapping token claims to corresponding User model attributes. Defaults to the following:
-```python
-{
-    "user_id": "id",
-    "username": "username",
-    "last_login": "last_login",
-}
-```
-See [Customizing token claims for user](#customizing-token-claims-for-user).
-
-### TOKEN_USER_ENCODER_CLS
-JSON encoder class used to serializing User attributes to JWT claims.
-See [Serializing user attribute into JWT claim](#serializing-user-attribute-into-jwt-claim)
+See [list of all available settings](docs/settings.md).
