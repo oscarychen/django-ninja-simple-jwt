@@ -8,12 +8,13 @@ from ninja_simple_jwt.settings import ninja_simple_jwt_settings
 
 
 def make_and_save_key_pair() -> tuple[str, str]:
-    jwt_key_storage = import_string(ninja_simple_jwt_settings.JWT_KEY_STORAGE)
+    jwt_private_key_storage = import_string(ninja_simple_jwt_settings.JWT_PRIVATE_KEY_STORAGE)
+    jwt_public_key_storage = import_string(ninja_simple_jwt_settings.JWT_PUBLIC_KEY_STORAGE)
     pem_private_key, pem_public_key = make_keys()
-    private_key_path = jwt_key_storage.save(
+    private_key_path = jwt_private_key_storage.save(
         name=ninja_simple_jwt_settings.JWT_PRIVATE_KEY_PATH, content=ContentFile(pem_private_key)
     )
-    public_key_path = jwt_key_storage.save(
+    public_key_path = jwt_public_key_storage.save(
         name=ninja_simple_jwt_settings.JWT_PUBLIC_KEY_PATH, content=ContentFile(pem_public_key)
     )
     InMemoryJwtKeyPair.clear()
