@@ -1,7 +1,10 @@
 # ninja_simple_jwt settings
 
-### JWT_KEY_STORAGE
-Storage class instance used to store JWT key pairs. Defaults to `"ninja_simple_jwt.jwt.key_store.local_disk_key_storage"`.
+### JWT_PRIVATE_KEY_STORAGE
+Storage class instance used to store JWT private signing key. Defaults to `"ninja_simple_jwt.jwt.key_store.local_disk_key_storage"`.
+
+### JWT_PUBLIC_KEY_STORAGE
+Storage class instance used to store JWT public verification key. Defaults to `"ninja_simple_jwt.jwt.key_store.local_disk_key_storage"`.
 
 ### JWT_PRIVATE_KEY_PATH
 Path to the private key, defaults to `"jwt-signing.pem"`.
