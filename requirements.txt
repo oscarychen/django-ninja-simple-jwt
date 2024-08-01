@@ -1,6 +1,6 @@
 
-black==23.11.0
-cryptography==41.0.7
+black==24.4.2
+cryptography==43.0.0
 Django>=4.2
 django-ninja>=1.0
 django-stubs[compatible-mypy]==4.2.7
