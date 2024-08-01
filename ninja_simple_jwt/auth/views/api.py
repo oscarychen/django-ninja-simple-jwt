@@ -20,6 +20,7 @@ from ninja_simple_jwt.jwt.token_operations import (
     get_refresh_token_for_user,
 )
 from ninja_simple_jwt.settings import ninja_simple_jwt_settings
+from ninja_simple_jwt.utils import make_authentication_params
 
 mobile_auth_router = Router()
 web_auth_router = Router()
@@ -28,7 +29,7 @@ web_auth_router = Router()
 @mobile_auth_router.post("/sign-in", response=MobileSignInResponse, url_name="mobile_signin")
 def mobile_sign_in(request: HttpRequest, payload: SignInRequest) -> dict:
     payload_data = payload.dict()
-    user = authenticate(username=payload_data["username"], password=payload_data["password"])
+    user = authenticate(**make_authentication_params(payload_data))
 
     if user is None:
         raise AuthenticationError()
@@ -53,7 +54,7 @@ def mobile_token_refresh(request: HttpRequest, payload: MobileTokenRefreshReques
 @web_auth_router.post("/sign-in", response=WebSignInResponse, url_name="web_signin")
 def web_sign_in(request: HttpRequest, payload: SignInRequest, response: HttpResponse) -> dict:
     payload_data = payload.dict()
-    user = authenticate(username=payload_data["username"], password=payload_data["password"])
+    user = authenticate(**make_authentication_params(payload_data))
 
     if user is None:
         raise AuthenticationError()

@@ -35,6 +35,9 @@ Same-site policy to be used for refresh token cookie, defaults to `"Strict"`.
 This is the path set on the cookie for refresh token, this path needs to match the url endpoint you are exposing for
 web token refresh. Defaults to `"/api/auth/web/token-refresh"`.
 
+### USERNAME_FIELD
+This is the field on the User model that is used as the username. Defaults to `"username"`.
+
 ### TOKEN_CLAIM_USER_ATTRIBUTE_MAP
 A dictionary mapping token claims to corresponding User model attributes. Defaults to the following:
 ```python
