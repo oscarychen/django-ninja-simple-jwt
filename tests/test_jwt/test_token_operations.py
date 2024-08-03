@@ -205,6 +205,7 @@ class TestUserTokenFunctions(TestCase):
                 TOKEN_CLAIM_USER_ATTRIBUTE_MAP={
                     "user_id": "id",
                     "username": "username",
+                    "name": lambda user: user.first_name + " " + user.last_name,
                 },
             )
         ):
@@ -223,3 +224,7 @@ class TestUserTokenFunctions(TestCase):
         self.assertEqual(decoded_token_data["token_type"], TokenTypes.ACCESS, "Token data has correct token_type.")
         self.assertIn("user_id", decoded_token_data, "Token data has user_id.")
         self.assertIn("username", decoded_token_data, "Token data has username.")
+        self.assertIn("name", decoded_token_data, "Token data has name.")
+        self.assertEqual(
+            decoded_token_data["name"], self.user.first_name + " " + self.user.last_name, "Token data has correct name."
+        )
