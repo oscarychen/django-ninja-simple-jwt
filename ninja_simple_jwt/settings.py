@@ -1,5 +1,5 @@
 from datetime import timedelta
-from typing import Any, Optional, TypedDict
+from typing import Any, Callable, Optional, TypedDict
 
 from django.conf import settings
 from django.test.signals import setting_changed
@@ -21,7 +21,7 @@ class NinjaSimpleJwtSettingsDict(TypedDict):
     WEB_REFRESH_COOKIE_SAME_SITE_POLICY: NotRequired[str]
     WEB_REFRESH_COOKIE_PATH: NotRequired[str]
     USERNAME_FIELD: NotRequired[str]
-    TOKEN_CLAIM_USER_ATTRIBUTE_MAP: NotRequired[dict[str, str]]
+    TOKEN_CLAIM_USER_ATTRIBUTE_MAP: NotRequired[dict[str, str | Callable[[Any], str | int | float | bool | None]]]
     TOKEN_USER_ENCODER_CLS: NotRequired[str]
 
 

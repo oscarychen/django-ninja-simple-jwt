@@ -200,6 +200,12 @@ By default, this setting has the following value:
     "last_login": "last_login",
 }
 ```
+The mapping can also take a function as the value, ie:
+```python
+{
+    "full_name": lambda user: user.first_name + " " + user.last_name,
+}
+```
 #### Serializing user attribute into JWT claim
 If the model attribute is not by default serializeable, you can specify how to serialize it by providing a custom
 implementation of json encoder class. Ie:

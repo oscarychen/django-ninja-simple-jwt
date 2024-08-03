@@ -34,7 +34,7 @@ def get_access_token_for_user(user: AbstractBaseUser) -> Tuple[str, dict]:
 
 def get_token_payload_for_user(user: AbstractBaseUser) -> dict:
     return {
-        claim: getattr(user, user_attr)
+        claim: getattr(user, user_attr) if isinstance(user_attr, str) else user_attr(user)
         for claim, user_attr in ninja_simple_jwt_settings.TOKEN_CLAIM_USER_ATTRIBUTE_MAP.items()
     }
 
