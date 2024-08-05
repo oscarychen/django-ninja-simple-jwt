@@ -32,8 +32,8 @@ Whether to use httponly cookie for refresh token, defaults to `True`.
 Same-site policy to be used for refresh token cookie, defaults to `"Strict"`.
 
 ### WEB_REFRESH_COOKIE_PATH
-This is the path set on the cookie for refresh token, this path needs to match the url endpoint you are exposing for
-web token refresh. Defaults to `"/api/auth/web/token-refresh"`.
+This is the path set on the cookie for refresh token, this path needs to match the url endpoints you are exposing for
+web token refresh and web sign out. Defaults to `"/api/auth/web"`.
 
 ### USERNAME_FIELD
 This is the field on the User model that is used as the username. Defaults to `"username"`.

@@ -36,7 +36,7 @@ DEFAULTS: NinjaSimpleJwtSettingsDict = {
     "WEB_REFRESH_COOKIE_SECURE": not settings.DEBUG,
     "WEB_REFRESH_COOKIE_HTTP_ONLY": True,
     "WEB_REFRESH_COOKIE_SAME_SITE_POLICY": "Strict",
-    "WEB_REFRESH_COOKIE_PATH": "/api/auth/web/token-refresh",
+    "WEB_REFRESH_COOKIE_PATH": "/api/auth/web",
     "USERNAME_FIELD": "username",
     "TOKEN_CLAIM_USER_ATTRIBUTE_MAP": {
         "user_id": "id",

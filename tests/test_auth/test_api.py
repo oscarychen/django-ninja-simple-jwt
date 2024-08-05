@@ -150,6 +150,26 @@ class TestWebRefresh(TestAuthEndPoints):
         self.assertIn("access", response.json(), "Response body has access token.")
         self.assertNotIn("refresh", response.json(), "Response body should not have refresh token.")
 
+    def test_user_token_refresh_invalid(self) -> None:
+
+        with self.settings(
+            NINJA_SIMPLE_JWT=self.merge_settings(
+                JWT_REFRESH_TOKEN_LIFETIME=timedelta(days=31),
+                JWT_ACCESS_TOKEN_LIFETIME=timedelta(minutes=5),
+                JWT_REFRESH_COOKIE_NAME="refresh-token",
+            )
+        ):
+            with freeze_time("2024-01-11 12:00:01"):
+                response = self.client.post(
+                    reverse("api-1.0.0:web_token_refresh"),
+                    content_type="application/json",
+                    HTTP_COOKIE="refresh-token=bad_token",
+                )
+
+        self.assertEqual(401, response.status_code, "Correct status code.")
+        self.assertNotIn("access", response.json(), "Response body does not have access token.")
+        self.assertNotIn("refresh", response.json(), "Response body does not have refresh token.")
+
 
 class TestWebSignOut(TestAuthEndPoints):
     def test_user_sign_out_with_valid_refresh_token(self) -> None:
@@ -190,5 +210,5 @@ class TestWebSignOut(TestAuthEndPoints):
                 HTTP_COOKIE="refresh-token=bad_token",
             )
 
-        self.assertEqual(204, response.status_code, "Correct status code.")
+        self.assertEqual(401, response.status_code, "Correct status code.")
         self.assertNotIn("refresh-token", response.cookies, "Response header Set-Cookie does not has refresh token.")
