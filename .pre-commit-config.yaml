@@ -59,7 +59,7 @@ repos:
         args: ["--config-file=mypy.ini"]
 
   - repo: https://github.com/psf/black
-    rev: 23.11.0
+    rev: 24.4.2
     hooks:
       - id: black
         args: [--diff, --check]
