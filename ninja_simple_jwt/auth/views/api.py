@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from django.contrib.auth import authenticate
 from django.contrib.auth.signals import user_logged_in
 from django.http import HttpRequest, HttpResponse
-from jwt.exceptions import ExpiredSignatureError, InvalidKeyError, InvalidTokenError, PyJWTError
+from jwt.exceptions import PyJWTError
 from ninja import Router
 from ninja.errors import AuthenticationError
 
@@ -82,7 +82,10 @@ def web_token_refresh(request: HttpRequest) -> dict:
     cookie = request.COOKIES.get(ninja_simple_jwt_settings.JWT_REFRESH_COOKIE_NAME)
     if cookie is None:
         raise AuthenticationError()
-    access_token, _ = get_access_token_from_refresh_token(cookie)
+    try:
+        access_token, _ = get_access_token_from_refresh_token(cookie)
+    except PyJWTError:
+        raise AuthenticationError()
     return {"access": access_token}
 
 
@@ -90,11 +93,11 @@ def web_token_refresh(request: HttpRequest) -> dict:
 def web_sign_out(request: HttpRequest, response: HttpResponse) -> tuple[int, str]:
     cookie = request.COOKIES.get(ninja_simple_jwt_settings.JWT_REFRESH_COOKIE_NAME)
     if cookie is None:
-        return 204, ""
+        raise AuthenticationError()
     try:
         decode_token(cookie, token_type=TokenTypes.REFRESH, verify=True)
-    except (ExpiredSignatureError, InvalidKeyError, InvalidTokenError):
-        return 204, ""
+    except PyJWTError:
+        raise AuthenticationError()
     response.delete_cookie(
         key=ninja_simple_jwt_settings.JWT_REFRESH_COOKIE_NAME, path=ninja_simple_jwt_settings.WEB_REFRESH_COOKIE_PATH
     )
