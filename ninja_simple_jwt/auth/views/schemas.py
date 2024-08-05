@@ -21,3 +21,7 @@ class MobileTokenRefreshResponse(Schema):
 
 class WebSignInResponse(Schema):
     access: str
+
+
+class Empty(Schema):
+    pass

@@ -127,7 +127,7 @@ class TestWebSignIn(TestAuthEndPoints):
 
 
 class TestWebRefresh(TestAuthEndPoints):
-    def test_user_token_refresh(self) -> None:
+    def test_user_token_refresh_valid(self) -> None:
         user = get_user_model().objects.create_user(username="user")
 
         with self.settings(
@@ -149,3 +149,46 @@ class TestWebRefresh(TestAuthEndPoints):
         self.assertEqual(200, response.status_code, "Correct status code.")
         self.assertIn("access", response.json(), "Response body has access token.")
         self.assertNotIn("refresh", response.json(), "Response body should not have refresh token.")
+
+
+class TestWebSignOut(TestAuthEndPoints):
+    def test_user_sign_out_with_valid_refresh_token(self) -> None:
+        user = get_user_model().objects.create_user(username="user")
+
+        with self.settings(
+            NINJA_SIMPLE_JWT=self.merge_settings(
+                JWT_REFRESH_COOKIE_NAME="refresh-token",
+                JWT_REFRESH_COOKIE_PATH="/tests/refresh_api_path",
+            )
+        ):
+            refresh_token, _ = get_refresh_token_for_user(user)
+            response = self.client.post(
+                reverse("api-1.0.0:web_sign_out"),
+                content_type="application/json",
+                HTTP_COOKIE=f"refresh-token={refresh_token}",
+            )
+
+        self.assertEqual(204, response.status_code, "Correct status code.")
+        self.assertIn("refresh-token", response.cookies, "Response header Set-Cookie has refresh token.")
+        self.assertEqual(
+            "",
+            response.cookies["refresh-token"].value,
+            "Refresh token cookie is deleted.",
+        )
+
+    def test_user_sign_out_with_invalid_refresh_token(self) -> None:
+
+        with self.settings(
+            NINJA_SIMPLE_JWT=self.merge_settings(
+                JWT_REFRESH_COOKIE_NAME="refresh-token",
+                JWT_REFRESH_COOKIE_PATH="/tests/refresh_api_path",
+            )
+        ):
+            response = self.client.post(
+                reverse("api-1.0.0:web_sign_out"),
+                content_type="application/json",
+                HTTP_COOKIE="refresh-token=bad_token",
+            )
+
+        self.assertEqual(204, response.status_code, "Correct status code.")
+        self.assertNotIn("refresh-token", response.cookies, "Response header Set-Cookie does not has refresh token.")

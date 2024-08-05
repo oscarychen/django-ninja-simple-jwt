@@ -187,6 +187,12 @@ curl --location --request POST 'http://127.0.0.1:8000/api/auth/web/token-refresh
 --header 'Cookie: refresh=...'
 ```
 The response would contain an access token in the body.
+- /api/auth/web/sign-out
+```commandline
+curl --location --request POST 'http://127.0.0.1:8000/api/auth/web/sign-out' \
+```
+This will respond with a 204 status code and clear the refresh cookie from client. Note that this does not invalidate
+the token, it only removes the refresh token from the client.
 
 ### Customizing token claims for user
 You can specify a claim on the JWT and what User model attribute to get the claim value from using the
