@@ -26,7 +26,10 @@ class HttpJwtAuth(HttpBearer):
     @staticmethod
     def set_token_claims_to_user(user: AbstractBaseUser | AnonymousUser, token: dict) -> None:
         for claim, user_attribute in ninja_simple_jwt_settings.TOKEN_CLAIM_USER_ATTRIBUTE_MAP.items():
-            setattr(user, user_attribute, token.get(claim))
+            if isinstance(user_attribute, str):
+                setattr(user, user_attribute, token.get(claim))
+            else:
+                setattr(user, claim, token.get(claim))
 
     def decode_authorization(self, value: str) -> str:
         parts = value.split(" ")
