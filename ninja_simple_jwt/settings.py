@@ -41,7 +41,14 @@ DEFAULTS: NinjaSimpleJwtSettingsDict = {
     "TOKEN_CLAIM_USER_ATTRIBUTE_MAP": {
         "user_id": "id",
         "username": "username",
+        "first_name": "first_name",
+        "last_name": "last_name",
+        "email": "email",
+        "is_staff": "is_staff",
+        "is_superuser": "is_superuser",
         "last_login": "last_login",
+        "date_joined": "date_joined",
+        "is_active": "is_active",
     },
     "TOKEN_USER_ENCODER_CLS": "ninja_simple_jwt.jwt.json_encode.TokenUserEncoder",
 }

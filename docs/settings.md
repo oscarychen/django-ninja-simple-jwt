@@ -39,15 +39,25 @@ web token refresh and web sign out. Defaults to `"/api/auth/web"`.
 This is the field on the User model that is used as the username. Defaults to `"username"`.
 
 ### TOKEN_CLAIM_USER_ATTRIBUTE_MAP
-A dictionary mapping token claims to corresponding User model attributes. Defaults to the following:
+A dictionary mapping token claims to corresponding User model attributes. Defaults to the following which are part
+of Django's default User model:
 ```python
 {
     "user_id": "id",
     "username": "username",
+    "first_name": "first_name",
+    "last_name": "last_name",
+    "email": "email",
+    "is_staff": "is_staff",
+    "is_superuser": "is_superuser",
     "last_login": "last_login",
+    "date_joined": "date_joined",
+    "is_active": "is_active",
 }
 ```
-See [Customizing token claims for user](../readme.md#customizing-token-claims-for-user).
+If you changed any of these attributes in your Django user model, you will need to update this dictionary accordingly.
+
+See also: [Customizing token claims for user](../readme.md#customizing-token-claims-for-user).
 
 ### TOKEN_USER_ENCODER_CLS
 JSON encoder class used to serializing User attributes to JWT claims.
