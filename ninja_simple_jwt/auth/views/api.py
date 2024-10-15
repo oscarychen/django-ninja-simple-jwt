@@ -32,7 +32,7 @@ web_auth_router = Router()
 @mobile_auth_router.post("/sign-in", response=MobileSignInResponse, url_name="mobile_signin")
 def mobile_sign_in(request: HttpRequest, payload: SignInRequest) -> dict:
     payload_data = payload.dict()
-    user = authenticate(**make_authentication_params(payload_data))
+    user = authenticate(request, **make_authentication_params(payload_data))
 
     if user is None:
         raise AuthenticationError()
@@ -57,7 +57,7 @@ def mobile_token_refresh(request: HttpRequest, payload: MobileTokenRefreshReques
 @web_auth_router.post("/sign-in", response=WebSignInResponse, url_name="web_signin")
 def web_sign_in(request: HttpRequest, payload: SignInRequest, response: HttpResponse) -> dict:
     payload_data = payload.dict()
-    user = authenticate(**make_authentication_params(payload_data))
+    user = authenticate(request, **make_authentication_params(payload_data))
 
     if user is None:
         raise AuthenticationError()
