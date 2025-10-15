@@ -1,4 +1,5 @@
 from datetime import datetime
+from datetime import timezone as dt_timezone
 from enum import Enum
 from json import JSONEncoder
 from typing import Any, Optional, Tuple
@@ -88,7 +89,7 @@ def decode_token(token: str, token_type: TokenTypes, verify: bool = True) -> dic
 def _verify_exp(payload: dict) -> None:
     now = timezone.now()
     token_expiry_unix_time = payload["exp"]
-    token_expiry = timezone.make_aware(datetime.fromtimestamp(token_expiry_unix_time))
+    token_expiry = datetime.fromtimestamp(token_expiry_unix_time, tz=dt_timezone.utc)
     if now >= token_expiry:
         raise ExpiredSignatureError("JWT has expired.")
 

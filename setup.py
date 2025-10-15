@@ -1,4 +1,4 @@
-from setuptools import find_packages, setup
+from setuptools import find_packages, setup  # pylint: disable=import-error,E0401
 
 setup(
     long_description_content_type="text/markdown",

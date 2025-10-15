@@ -21,6 +21,8 @@ class NinjaSimpleJwtSettingsDict(TypedDict):
     WEB_REFRESH_COOKIE_SAME_SITE_POLICY: NotRequired[str]
     WEB_REFRESH_COOKIE_PATH: NotRequired[str]
     USERNAME_FIELD: NotRequired[str]
+    USE_STATELESS_AUTH: NotRequired[bool]
+    TOKEN_USER_CLS: NotRequired[str]
     TOKEN_CLAIM_USER_ATTRIBUTE_MAP: NotRequired[dict[str, str | Callable[[Any], str | int | float | bool | None]]]
     TOKEN_USER_ENCODER_CLS: NotRequired[str]
 
@@ -38,6 +40,8 @@ DEFAULTS: NinjaSimpleJwtSettingsDict = {
     "WEB_REFRESH_COOKIE_SAME_SITE_POLICY": "Strict",
     "WEB_REFRESH_COOKIE_PATH": "/api/auth/web",
     "USERNAME_FIELD": "username",
+    "USE_STATELESS_AUTH": True,
+    "TOKEN_USER_CLS": "ninja_simple_jwt.auth.token_user.TokenUser",
     "TOKEN_CLAIM_USER_ATTRIBUTE_MAP": {
         "user_id": "id",
         "username": "username",
@@ -97,10 +101,10 @@ class NinjaSimpleJwtSettings:
 ninja_simple_jwt_settings = NinjaSimpleJwtSettings(USER_SETTINGS, DEFAULTS)
 
 
-def reload_drf_stripe_settings(*args: Any, **kwargs: Any) -> None:
+def reload_ninja_simple_jwt_settings(*args: Any, **kwargs: Any) -> None:
     setting = kwargs["setting"]
     if setting == "NINJA_SIMPLE_JWT":
         ninja_simple_jwt_settings.reload()
 
 
-setting_changed.connect(reload_drf_stripe_settings)
+setting_changed.connect(reload_ninja_simple_jwt_settings)
