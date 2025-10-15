@@ -15,6 +15,7 @@ load-plugins = "pylint_django"
 django-settings-module = "tests.settings"
 max-parents = 15
 max-attributes=12
+ignore = ["setup.py"]
 
 [tool.pylint.messages_control]
 
