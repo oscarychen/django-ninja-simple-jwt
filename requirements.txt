@@ -11,5 +11,6 @@ pre-commit==3.4.0
 pyjwt>=2.6
 pylint==3.0.2
 pylint-django==2.5.5
+setuptools>=65.0
 tox==4.11
 wheel>=0.4
