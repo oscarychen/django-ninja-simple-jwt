@@ -28,7 +28,7 @@ class HttpJwtAuth(HttpBearer):
             # Extract user_id from the token
             user_id = decoded_token.get("user_id")
             if not user_id:
-                raise AuthenticationError("Invalid token: missing user_id")
+                raise AuthenticationError(status_code=401, message="Invalid token: missing user_id")
 
             user: TokenUser | AbstractBaseUser | None
             # Authenticate based on configuration
@@ -37,7 +37,7 @@ class HttpJwtAuth(HttpBearer):
             else:
                 user = self._get_user_from_database(user_id)
                 if user is None:
-                    raise AuthenticationError("Invalid or expired token")
+                    raise AuthenticationError(status_code=401, message="Invalid or expired token")
 
             # Set the authenticated user on the request
             request.user = user  # type: ignore[assignment]
@@ -45,7 +45,7 @@ class HttpJwtAuth(HttpBearer):
             return True
 
         except PyJWTError as e:
-            raise AuthenticationError(f"Invalid or expired token: {e}") from e
+            raise AuthenticationError(status_code=401, message=f"Invalid or expired token: {e}") from e
 
     @staticmethod
     def _create_stateless_user(token: dict) -> TokenUser:
