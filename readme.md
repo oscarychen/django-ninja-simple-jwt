@@ -108,6 +108,24 @@ NINJA_SIMPLE_JWT = {
 }
 ```
 
+### Loading JWT keys from environment variables
+
+Instead of reading keys from files, you can provide the key content directly via settings. This is useful for
+containerized deployments where mounting key files is impractical.
+
+```python
+# settings.py
+import os
+
+NINJA_SIMPLE_JWT = {
+    "JWT_PRIVATE_KEY": os.environ.get("JWT_PRIVATE_KEY"),
+    "JWT_PUBLIC_KEY": os.environ.get("JWT_PUBLIC_KEY"),
+}
+```
+
+When `JWT_PRIVATE_KEY` and `JWT_PUBLIC_KEY` are set, the library uses them directly and skips file-based key loading.
+When they are `None` (the default), it falls back to loading keys from files using the storage backend.
+
 ### Customizing JWT key storage
 
 By default, the management command `make_jwt_key` will create and store the JWT key pairs in the root of your project

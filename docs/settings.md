@@ -1,5 +1,13 @@
 # ninja_simple_jwt settings
 
+### JWT_PRIVATE_KEY
+
+PEM-encoded private key content as a string. When set, the library uses this value directly instead of reading from a file. Defaults to `None` (falls back to file-based loading via `JWT_PRIVATE_KEY_STORAGE` and `JWT_PRIVATE_KEY_PATH`).
+
+### JWT_PUBLIC_KEY
+
+PEM-encoded public key content as a string. When set, the library uses this value directly instead of reading from a file. Defaults to `None` (falls back to file-based loading via `JWT_PUBLIC_KEY_STORAGE` and `JWT_PUBLIC_KEY_PATH`).
+
 ### JWT_PRIVATE_KEY_STORAGE
 
 Storage class instance used to store JWT private signing key. Defaults to `"ninja_simple_jwt.jwt.key_store.local_disk_key_storage"`.

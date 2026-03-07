@@ -9,6 +9,8 @@ USER_SETTINGS = getattr(settings, "NINJA_SIMPLE_JWT", None)
 
 
 class NinjaSimpleJwtSettingsDict(TypedDict):
+    JWT_PRIVATE_KEY: NotRequired[Optional[str]]
+    JWT_PUBLIC_KEY: NotRequired[Optional[str]]
     JWT_PRIVATE_KEY_STORAGE: NotRequired[str]
     JWT_PUBLIC_KEY_STORAGE: NotRequired[str]
     JWT_PRIVATE_KEY_PATH: NotRequired[str]
@@ -30,6 +32,8 @@ class NinjaSimpleJwtSettingsDict(TypedDict):
 
 
 DEFAULTS: NinjaSimpleJwtSettingsDict = {
+    "JWT_PRIVATE_KEY": None,
+    "JWT_PUBLIC_KEY": None,
     "JWT_PRIVATE_KEY_STORAGE": "ninja_simple_jwt.jwt.key_store.local_disk_key_storage",
     "JWT_PUBLIC_KEY_STORAGE": "ninja_simple_jwt.jwt.key_store.local_disk_key_storage",
     "JWT_PRIVATE_KEY_PATH": "jwt-signing.pem",
