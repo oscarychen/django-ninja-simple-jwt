@@ -107,6 +107,14 @@ NINJA_SIMPLE_JWT = {
     "USE_STATELESS_AUTH": False,
 }
 ```
+### Using EdDSA(Ed25519) for JWT signing
+By default, RSA 2048-bit key is used. You can opt to using Ed25519 instead:
+```python
+# settings.py
+NINJA_SIMPLE_JWT = {
+    "JWT_ALGORITHM": "EdDSA",
+}
+```
 
 ### Loading JWT keys from environment variables
 
