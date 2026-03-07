@@ -1,13 +1,17 @@
+import warnings
 from typing import Any
 
+from django.core.management import call_command
 from django.core.management.base import BaseCommand
-
-from ninja_simple_jwt.jwt.key_creation import make_and_save_key_pair
 
 
 class Command(BaseCommand):
-    help = "Create RSA key pair."
+    help = "Deprecated: use make_jwt_key instead. Create JWT key pair."
 
     def handle(self, *args: Any, **kwargs: Any) -> None:
-        private_key_path, public_key_path = make_and_save_key_pair()
-        print(f"Key pair created: \n {private_key_path}\n {public_key_path}")
+        warnings.warn(
+            "make_rsa is deprecated, use make_jwt_key instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        call_command("make_jwt_key")

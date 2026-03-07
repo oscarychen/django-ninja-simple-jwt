@@ -65,7 +65,7 @@ def encode_token(
         jwt.encode(
             payload_data,
             InMemoryJwtKeyPair.private_key,
-            algorithm="RS256",
+            algorithm=ninja_simple_jwt_settings.JWT_ALGORITHM,
             headers=additional_headers,
             json_encoder=json_encoder,
         ),
@@ -78,7 +78,7 @@ def decode_token(token: str, token_type: TokenTypes, verify: bool = True) -> dic
         decoded = jwt.decode(
             token,
             InMemoryJwtKeyPair.public_key,
-            algorithms=["RS256"],
+            algorithms=[ninja_simple_jwt_settings.JWT_ALGORITHM],
             leeway=ninja_simple_jwt_settings.JWT_LEEWAY,
         )
         _verify_jti(decoded)

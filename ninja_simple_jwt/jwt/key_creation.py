@@ -1,5 +1,6 @@
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from django.core.files.base import ContentFile
 from django.utils.module_loading import import_string
 
@@ -22,11 +23,34 @@ def make_and_save_key_pair() -> tuple[str, str]:
 
 
 def make_keys() -> tuple[bytes, bytes]:
+    algorithm = ninja_simple_jwt_settings.JWT_ALGORITHM
+    if algorithm == "EdDSA":
+        return _make_ed25519_keys()
+    return _make_rsa_keys()
+
+
+def _make_rsa_keys() -> tuple[bytes, bytes]:
     private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
 
     pem_private_key = private_key.private_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PrivateFormat.TraditionalOpenSSL,
+        encryption_algorithm=serialization.NoEncryption(),
+    )
+
+    pem_public_key = private_key.public_key().public_bytes(
+        encoding=serialization.Encoding.PEM, format=serialization.PublicFormat.SubjectPublicKeyInfo
+    )
+
+    return pem_private_key, pem_public_key
+
+
+def _make_ed25519_keys() -> tuple[bytes, bytes]:
+    private_key = Ed25519PrivateKey.generate()
+
+    pem_private_key = private_key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.PKCS8,
         encryption_algorithm=serialization.NoEncryption(),
     )
 

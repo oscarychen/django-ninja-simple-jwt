@@ -76,7 +76,7 @@ def hello(request):
 Finally, before starting up the server, create a key pair to be used by the server for signing and verifying JWT:
 
 ```commandline
-python manage.py make_rsa
+python manage.py make_jwt_key
 ```
 
 You should see two files created in the root of project repository:
@@ -110,7 +110,7 @@ NINJA_SIMPLE_JWT = {
 
 ### Customizing JWT key storage
 
-By default, the management command `make_rsa` will create and store the JWT key pairs in the root of your project
+By default, the management command `make_jwt_key` will create and store the JWT key pairs in the root of your project
 directory, this is only intended for development.
 
 Here is an example how you can store the keys in a S3 bucket somewhere only your application has access to, assuming

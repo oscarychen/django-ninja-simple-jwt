@@ -26,6 +26,7 @@ class NinjaSimpleJwtSettingsDict(TypedDict):
     TOKEN_CLAIM_USER_ATTRIBUTE_MAP: NotRequired[dict[str, str | Callable[[Any], str | int | float | bool | None]]]
     TOKEN_USER_ENCODER_CLS: NotRequired[str]
     JWT_LEEWAY: NotRequired[timedelta]
+    JWT_ALGORITHM: NotRequired[str]
 
 
 DEFAULTS: NinjaSimpleJwtSettingsDict = {
@@ -57,6 +58,7 @@ DEFAULTS: NinjaSimpleJwtSettingsDict = {
     },
     "TOKEN_USER_ENCODER_CLS": "ninja_simple_jwt.jwt.json_encode.TokenUserEncoder",
     "JWT_LEEWAY": timedelta(seconds=10),
+    "JWT_ALGORITHM": "RS256",
 }
 
 EMPTY_SETTINGS: NinjaSimpleJwtSettingsDict = {}

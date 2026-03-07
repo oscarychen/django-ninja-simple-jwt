@@ -83,6 +83,14 @@ If you changed any of these attributes in your Django user model, you will need 
 
 See also: [Customizing token claims for user](../readme.md#customizing-token-claims-for-user).
 
+### JWT_ALGORITHM
+
+The signing algorithm used for JWT tokens. Supported values are `"RS256"` (RSA, default) and `"EdDSA"` (Ed25519).
+
+When changing this setting, you must regenerate your key pair with `python manage.py make_jwt_key`.
+
+Defaults to `"RS256"`.
+
 ### JWT_LEEWAY
 
 Time margin (as a `timedelta`) to account for clock skew between servers when verifying token expiration. This is passed directly to PyJWT's `jwt.decode()` as the `leeway` parameter.
