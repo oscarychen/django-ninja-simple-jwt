@@ -83,6 +83,12 @@ If you changed any of these attributes in your Django user model, you will need 
 
 See also: [Customizing token claims for user](../readme.md#customizing-token-claims-for-user).
 
+### JWT_LEEWAY
+
+Time margin (as a `timedelta`) to account for clock skew between servers when verifying token expiration. This is passed directly to PyJWT's `jwt.decode()` as the `leeway` parameter.
+
+Defaults to `timedelta(seconds=10)`.
+
 ### TOKEN_USER_ENCODER_CLS
 
 JSON encoder class used to serializing User attributes to JWT claims.

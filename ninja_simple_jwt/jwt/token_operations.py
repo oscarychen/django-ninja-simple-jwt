@@ -1,5 +1,3 @@
-from datetime import datetime
-from datetime import timezone as dt_timezone
 from enum import Enum
 from json import JSONEncoder
 from typing import Any, Optional, Tuple
@@ -9,7 +7,7 @@ import jwt
 from django.contrib.auth.models import AbstractBaseUser
 from django.utils import timezone
 from django.utils.module_loading import import_string
-from jwt import ExpiredSignatureError, InvalidKeyError, InvalidTokenError
+from jwt import InvalidKeyError, InvalidTokenError
 
 from ninja_simple_jwt.jwt.key_retrieval import InMemoryJwtKeyPair
 from ninja_simple_jwt.settings import ninja_simple_jwt_settings
@@ -77,21 +75,17 @@ def encode_token(
 
 def decode_token(token: str, token_type: TokenTypes, verify: bool = True) -> dict:
     if verify is True:
-        decoded = jwt.decode(token, InMemoryJwtKeyPair.public_key, algorithms=["RS256"])
-        _verify_exp(decoded)
+        decoded = jwt.decode(
+            token,
+            InMemoryJwtKeyPair.public_key,
+            algorithms=["RS256"],
+            leeway=ninja_simple_jwt_settings.JWT_LEEWAY,
+        )
         _verify_jti(decoded)
         _verify_token_type(decoded, token_type)
     else:
         decoded = jwt.get_unverified_header(token)
     return decoded
-
-
-def _verify_exp(payload: dict) -> None:
-    now = timezone.now()
-    token_expiry_unix_time = payload["exp"]
-    token_expiry = datetime.fromtimestamp(token_expiry_unix_time, tz=dt_timezone.utc)
-    if now >= token_expiry:
-        raise ExpiredSignatureError("JWT has expired.")
 
 
 def _verify_jti(payload: dict) -> None:
