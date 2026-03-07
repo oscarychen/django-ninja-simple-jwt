@@ -22,12 +22,18 @@ class InMemoryJwtKeyPair:
 
     @staticmethod
     def _get_private_jwt_key() -> bytes:
+        key = ninja_simple_jwt_settings.JWT_PRIVATE_KEY
+        if key is not None:
+            return key.encode() if isinstance(key, str) else key
         jwt_key_storage = import_string(ninja_simple_jwt_settings.JWT_PRIVATE_KEY_STORAGE)
         with jwt_key_storage.open(ninja_simple_jwt_settings.JWT_PRIVATE_KEY_PATH) as f:
             return f.read()
 
     @staticmethod
     def _get_public_jwt_key() -> bytes:
+        key = ninja_simple_jwt_settings.JWT_PUBLIC_KEY
+        if key is not None:
+            return key.encode() if isinstance(key, str) else key
         jwt_key_storage = import_string(ninja_simple_jwt_settings.JWT_PUBLIC_KEY_STORAGE)
         with jwt_key_storage.open(ninja_simple_jwt_settings.JWT_PUBLIC_KEY_PATH) as f:
             return f.read()
